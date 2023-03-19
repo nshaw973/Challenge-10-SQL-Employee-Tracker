@@ -3,37 +3,44 @@ const mysql = require('mysql2');
 const {viewAllEmployees} = require('./queries/query.js')
 const cTable = require('console.table');
 
-
-//will be used to create the db data
-const db = mysql.createConnection(
-    {
-      host: 'localhost',
-      user: `root`,
-      password: '',
-      database: 'company_db'
-    },
-    console.log(`Connected to the company_db database.`)
-);
+//Stores the current username and password being used by the user, to connect to mysql and the database.
+let db;
 
 //Inquirer function to ask the user for the username and password to login into mysql
-/* async function mysqlLogin () {
-    await inquirer
+function mysqlLogin () {
+inquirer
     .prompt ([
         {
             type: 'input',
-            message: 'mysql username',
+            message: 'MYSQL Username',
             name: 'username'
         },
         {
             type: 'password',
             message: 'Enter Password',
             name: 'password'
-        }
+        },
     ]).then((data) => {
-        return data
+
+        db = mysql.createConnection(
+            {
+            host: 'localhost',
+            user: `${data.username}`,
+            password: `${data.password}`,
+            database: 'company_db',
+            },
+        );
+
+        db.connect((err) => {
+            if(err) {
+                console.error(err)
+                process.exit(1);
+            }
+            console.log('Connected to database...');
+            mainMenu()
+        })
     })
 }
- */
 
 //This is the Main Menu for inquirer which has all the options who will then branch out into their respective functions.
 function mainMenu () {
@@ -90,4 +97,4 @@ function mainMenu () {
     });
 };
 
-mainMenu();
+mysqlLogin();
