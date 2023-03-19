@@ -1,5 +1,39 @@
 const inquirer = require('inquirer');
-const db = require('mysql2');
+const mysql = require('mysql2');
+const {viewAllEmployees} = require('./queries/query.js')
+const cTable = require('console.table');
+
+
+//will be used to create the db data
+const db = mysql.createConnection(
+    {
+      host: 'localhost',
+      user: `root`,
+      password: '',
+      database: 'company_db'
+    },
+    console.log(`Connected to the company_db database.`)
+);
+
+//Inquirer function to ask the user for the username and password to login into mysql
+/* async function mysqlLogin () {
+    await inquirer
+    .prompt ([
+        {
+            type: 'input',
+            message: 'mysql username',
+            name: 'username'
+        },
+        {
+            type: 'password',
+            message: 'Enter Password',
+            name: 'password'
+        }
+    ]).then((data) => {
+        return data
+    })
+}
+ */
 
 //This is the Main Menu for inquirer which has all the options who will then branch out into their respective functions.
 function mainMenu () {
@@ -14,8 +48,16 @@ function mainMenu () {
     ]).then((data) => {
         switch (data.menuOption) {
             case 'View All Employees':
-                console.log('Viewing all employees');
-                mainMenu();
+                db.query(viewAllEmployees, (err, res) => {
+                    if (err) {
+                        console.log('Error, unable to display all employees')
+                        mainMenu();
+                    }
+                    console.log('===============================================================================\n')
+                    console.table(res)
+                    console.log('===============================================================================\n')
+                    mainMenu();
+                })
                 break;
             case 'Add Employee':
                 console.log('Adding Employees');
