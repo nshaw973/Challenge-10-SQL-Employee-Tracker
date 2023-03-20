@@ -21,12 +21,17 @@ FROM department
 ORDER BY department.id;`
 
 const viewAllRoles = `SELECT
-role.title AS role_title,
 role.id AS role_id,
-role.department_id AS department_id,
+role.title AS role_title,
+department.name AS department,
 role.salary as salary
 FROM role
+JOIN department ON department.id = role.department_id
 ORDER BY role_id;`
+
+//These are for adding
+
+
 
 module.exports = {
     viewAllEmployees,

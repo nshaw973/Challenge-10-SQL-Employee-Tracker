@@ -54,6 +54,8 @@ function mainMenu () {
         },
     ]).then((data) => {
         switch (data.menuOption) {
+
+            //VIEW ALL EMPLOYEES
             case 'View All Employees':
                 db.query(viewAllEmployees, (err, res) => {
                     if (err) {
@@ -67,14 +69,20 @@ function mainMenu () {
                     }
                 })
                 break;
+
+            //ADD EMPLOYEE
             case 'Add Employee':
                 console.log('Adding Employees');
                 mainMenu();
                 break;
+
+            //UPDATE EMPLOYEE ROLE
             case 'Update Employee Role':
                 console.log('updating employees roles');
                 mainMenu();
                 break;
+
+            //VIEW ALL ROLES
             case 'View All Roles':
                 db.query(viewAllRoles, (err, res) => {
                     if (err) {
@@ -89,7 +97,13 @@ function mainMenu () {
                 })
                 mainMenu();
                 break;
+
+            //ADD ROLES
             case 'Add Role':
+                const departmentList = 'SELECT name FROM department;';
+                db.query(departmentList, (err, results) => {
+                    if (err) throw err;
+                    let depList = results.map(results => results.name);                
                 inquirer
                 .prompt([
                     {
@@ -105,22 +119,36 @@ function mainMenu () {
                     {
                         type: 'list',
                         message: 'What department does this role belong to?',
-                        name: 'roleDepartment',
-                        choices: [1, 2, 5, 7]
-                    }
+                        name: 'roleDept',
+                        choices: depList,
+                    },
                 ]).then((data) => {
+
+                    let deptId;
                     let salary = parseInt(data.roleSalary)
-                    const role = `INSERT INTO role (title, salary, department_id) VALUES ("${data.roleName}", ${salary}, ${data.roleDepartment});`
+                    console.log(salary)
+                    db.query(`SELECT id FROM department WHERE name = '${data.roleDept}';`, (err, results) => {
+                        if(err) throw err;
+                        deptId = results;
+                    
+                    console.log(deptId[0].id)
+                    const role = `INSERT INTO role (title, salary, department_id) VALUES ("${data.roleName}", ${salary}, ${deptId[0].id});`
+                    console.log(role)
                     db.query(role, (err, res) => {
                         if (err) {
                             console.log('Error')
                             mainMenu();
                         } else {
+                        console.log('Role Added Succesfully!')
                         mainMenu();
                         }
                     })
                 })
+            })
+            })
                 break;
+
+            //VIEW ALL DEPARTMENTS
             case 'View All Departments':
                 db.query(viewDepartments, (err, res) => {
                     if (err) {
@@ -135,6 +163,8 @@ function mainMenu () {
                 })
                 mainMenu();
                 break;
+
+            //ADDS DEPARTMENT
             case 'Add Department':
                 inquirer
                 .prompt([
@@ -155,6 +185,8 @@ function mainMenu () {
                     })
                 })
                 break;
+
+            //EXIT OUT OF SESSION
             case 'Quit':
                 console.log('Now Exiting...')
                 process.exit();
