@@ -15,19 +15,19 @@ JOIN employee ON role.department_id = role_id
 ORDER BY employee.id;`
 
 const viewDepartments = `SELECT
-department.name AS department_name,
-department.id AS department_id
+department.id AS department_id,
+department.name AS department_name
 FROM department
 ORDER BY department.id;`
 
 const viewAllRoles = `SELECT
-role.id AS role_id,
-role.title AS role_title,
+role.id AS id,
+role.title AS title,
 department.name AS department,
 role.salary as salary
 FROM role
 JOIN department ON department.id = role.department_id
-ORDER BY role_id;`
+ORDER BY id;`
 
 //These are for adding
 
