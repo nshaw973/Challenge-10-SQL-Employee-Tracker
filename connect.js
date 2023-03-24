@@ -1,7 +1,10 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 
+// Uses inquirer to login to mysql
 function mysqlLogin () {
+    //turning the function into a promise, to both create an asynchronus function
+    //that will be added to a const db in the index.js
     return new Promise((resolve, reject) => {
         inquirer
         .prompt ([
@@ -16,7 +19,8 @@ function mysqlLogin () {
                 name: 'password'
             },
         ]).then((data) => {
-    
+            
+            // This db, is what's going to be returned as the value for db in index.js
             db = mysql.createConnection(
                 {
                 host: 'localhost',
@@ -32,6 +36,7 @@ function mysqlLogin () {
                     process.exit(1);
                 } else {
                 console.log('Connected to database...');
+                //Returns teh db value with the filled out login info.
                 resolve(db)
                 };
             });
@@ -40,4 +45,4 @@ function mysqlLogin () {
     })
 };
 
-    module.exports = { mysqlLogin };
+module.exports = { mysqlLogin };

@@ -1,5 +1,6 @@
 //All the queries needed for each function//
 
+// View All Queries
 const viewAllEmployees = `SELECT  
 e1.id,
 e1.first_name,
@@ -29,12 +30,28 @@ FROM role
 JOIN department ON department.id = role.department_id
 ORDER BY id;`
 
-//These are for adding
+// Select Queries
 
+const queries = {
+    // Selects
+    departmentList: 'SELECT name FROM department;',
+    fullName: 'SELECT first_name, last_name FROM employee;',
+    idDepartmentWhereRole: 'SELECT id FROM department WHERE name = ?',
+    roleId: 'SELECT id FROM role WHERE title = ?',
+    roleTitle: 'SELECT title FROM role;',
+    idRoleFullName: 'SELECT id FROM employee WHERE first_name = ? AND last_name = ?',
+    // Inserts
+    insertEmployee: 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);',
+    insertRole: 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?);',
+    insertDepartment: 'INSERT INTO department (name) VALUES ( ? );',
+    // Updates
+    updateRole: 'Update employee SET role_id = ? WHERE first_name = ? AND last_name = ?'
+}
 
 
 module.exports = {
     viewAllEmployees,
     viewDepartments,
-    viewAllRoles
+    viewAllRoles,
+    queries
 }
