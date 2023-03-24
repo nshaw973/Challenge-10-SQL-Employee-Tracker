@@ -1,7 +1,8 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
-const { viewAllEmployees, viewDepartments, viewAllRoles} = require('./queries/query.js')
+const { viewAllEmployees, viewDepartments, viewAllRoles} = require('./queries/query.js');
 const cTable = require('console.table');
+const connect = require('./connect.js');
 
 //Stores the current username and password being used by the user, to connect to mysql and the database.
 let db;
@@ -128,10 +129,11 @@ function mainMenu () {
 
                             employee = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("${data.firstName}", "${data.lastName}", ${deptId[0].id}, ${results[0].id});`
                             db.query(employee)
+
                             mainMenu();
                         })
                         } else {
-                            employee = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("${data.firstName}", "${data.lastName}", ${deptId[0].id}, null);`
+                            employee = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("${data.firstName}", "${data.lastName}", ${deptId[0].id}, NULL);`
                             db.query(employee)
                             mainMenu();
                         }        
@@ -143,8 +145,49 @@ function mainMenu () {
 
             //UPDATE EMPLOYEE ROLE
             case 'Update Employee Role':
-                console.log('updating employees roles');
-                mainMenu();
+
+            const selectEmployee = 'SELECT first_name, last_name FROM employee;';
+            const selectRole = 'SELECT title FROM role;';
+                    db.query(selectEmployee, (err, results) => { 
+
+                        const employeeList = results.map(results => `${results.first_name} ${results.last_name}`)
+
+
+                        db.query(selectRole, (err, results) => {
+                            const roleList = results.map(results => `${results.title}`)
+
+                            inquirer
+                            .prompt([
+                                {
+                                    type: 'list',
+                                    message: `Which Employee would you like to update?`,
+                                    name: 'employee',
+                                    choices: employeeList
+                                },
+                                {
+                                    type: 'list',
+                                    message: 'What role would you like to assign?',
+                                    name: 'role',
+                                    choices: roleList
+                                }
+                            ]).then((data) => {
+
+                                const name = data.employee.split(" ");
+                                const firstName = name[0];
+                                const lastName = name[1];
+
+                                const roleId = `SELECT id FROM role WHERE title = "${data.role}";`
+                                db.query(roleId, (err, results) => {
+
+                                    const updatedRole = `UPDATE employee SET role_id = ${results[0].id} WHERE first_name = "${firstName}" AND last_name = "${lastName}";`
+                                    db.query(updatedRole)
+                                    mainMenu();
+
+                                })
+                            })
+                        })
+                    })
+
                 break;
 
             //VIEW ALL ROLES
@@ -194,7 +237,6 @@ function mainMenu () {
                         if(err) throw err;
                         deptId = results;
                     const role = `INSERT INTO role (title, salary, department_id) VALUES ("${data.roleName}", ${salary}, ${deptId[0].id});`
-                    console.log(role)
                     db.query(role, (err, res) => {
                         if (err) {
                             console.log('Error')
@@ -240,6 +282,7 @@ function mainMenu () {
                             console.log('error has occured')
                             mainMenu()
                         } else {
+                        console.log('Department added successfully!')
                         mainMenu();
                         }
                     })

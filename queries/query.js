@@ -1,18 +1,18 @@
 //All the queries needed for each function//
 
-//These 3 are for displaying the full tables
 const viewAllEmployees = `SELECT  
-employee.id,
-employee.first_name,
-employee.last_name,
+e1.id,
+e1.first_name,
+e1.last_name,
 role.title,
 department.name AS department,
 role.salary,
-employee.manager_id AS manager
-FROM department
-JOIN role ON department.id = role.department_id
-JOIN employee ON role.department_id = role_id
-ORDER BY employee.id;`
+CONCAT(e2.first_name, " ", e2.last_name) AS manager
+FROM employee e1
+LEFT JOIN employee e2 ON e2.id = e1.manager_id
+JOIN role ON role.id = e1.role_id
+JOIN department ON department.id = role.department_id
+ORDER BY e1.id;`
 
 const viewDepartments = `SELECT
 department.id AS department_id,

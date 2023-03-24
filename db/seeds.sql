@@ -8,7 +8,7 @@ INSERT INTO role (title, salary, department_id)
 
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
-    VALUES  ("firstName", "lastName", 1, null)
+    VALUES  ("firstName", "lastName", 1, null),
             ("manager", "manager", 1, 1)
 
 
