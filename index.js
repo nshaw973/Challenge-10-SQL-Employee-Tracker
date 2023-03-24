@@ -1,47 +1,20 @@
 const inquirer = require('inquirer');
-const mysql = require('mysql2');
 const { viewAllEmployees, viewDepartments, viewAllRoles} = require('./queries/query.js');
 const cTable = require('console.table');
-const connect = require('./connect.js');
+const { mysqlLogin } = require('./connect.js');
 
-//Stores the current username and password being used by the user, to connect to mysql and the database.
+//stores the login info for mysql, found in init function
 let db;
 
-//Inquirer function to ask the user for the username and password to login into mysql
-function mysqlLogin () {
-inquirer
-    .prompt ([
-        {
-            type: 'input',
-            message: 'MYSQL Username',
-            name: 'username'
-        },
-        {
-            type: 'password',
-            message: 'Enter Password',
-            name: 'password'
-        },
-    ]).then((data) => {
+//Connects to the connect.js file that stores the inquirer process to login to mysql
+async function init () {
+    try {
+    db = await mysqlLogin()
+    mainMenu();
+    } catch (err) {
+        console.log(err)
+    }
 
-        db = mysql.createConnection(
-            {
-            host: 'localhost',
-            user: `${data.username}`,
-            password: `${data.password}`,
-            database: 'company_db',
-            },
-        );
-
-        db.connect((err) => {
-            if(err) {
-                console.log('Error with login, please check username or password.')
-                process.exit(1);
-            } else {
-            console.log('Connected to database...');
-            mainMenu()
-            }
-        })
-    })
 }
 
 //This is the Main Menu for inquirer which has all the options who will then branch out into their respective functions.
@@ -301,4 +274,4 @@ function spaceDivider() {
     console.log('\n===============================================================================\n')
 };
 
-mysqlLogin();
+init();
