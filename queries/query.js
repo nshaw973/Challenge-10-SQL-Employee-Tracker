@@ -35,6 +35,7 @@ ORDER BY id;`
 const queries = {
     // Selects
     departmentList: 'SELECT name FROM department;',
+    roleTitle: 'SELECT title FROM role;',
     fullName: 'SELECT first_name, last_name FROM employee;',
     idDepartmentWhereRole: 'SELECT id FROM department WHERE name = ?',
     roleId: 'SELECT id FROM role WHERE title = ?',
@@ -47,7 +48,6 @@ const queries = {
     // Updates
     updateRole: 'Update employee SET role_id = ? WHERE first_name = ? AND last_name = ?'
 }
-
 
 module.exports = {
     viewAllEmployees,
