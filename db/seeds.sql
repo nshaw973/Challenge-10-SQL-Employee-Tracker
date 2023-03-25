@@ -1,3 +1,5 @@
+/* These are for testing purposes. */
+
 INSERT INTO department (name)
     VALUES  ("Management");
 

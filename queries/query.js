@@ -32,12 +32,14 @@ ORDER BY id;`
 
 const queries = {
     // Selects
+    // From department
     departmentList: 'SELECT name FROM department;',
-    roleTitle: 'SELECT title FROM role;',
-    fullName: 'SELECT first_name, last_name FROM employee;',
     idDepartmentWhereRole: 'SELECT id FROM department WHERE name = ?',
-    roleId: 'SELECT id FROM role WHERE title = ?',
+    // From role
     roleTitle: 'SELECT title FROM role;',
+    roleId: 'SELECT id FROM role WHERE title = ?',
+    // From Employee
+    fullName: 'SELECT first_name, last_name FROM employee;',
     idRoleFullName: 'SELECT id FROM employee WHERE first_name = ? AND last_name = ?',
     // Inserts
     insertEmployee: 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);',
