@@ -26,7 +26,7 @@ function mainMenu () {
             type: 'list',
             message: 'What would you like to do?',
             name: 'menuOption',
-            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Quit']
+            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'Update Employee Manager','View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Quit']
         },
     ]).then((data) => {
         // Takes one of the choices the user chose, and selects the corresponding case that matches.
@@ -58,9 +58,9 @@ function mainMenu () {
                     // Creates an array of all employees that are potential Managers for the employee being created.
                     db.query(queries.fullName, (err, results) => {
                         // creates an array of all the employees and attaches their first and last name together
-                        const managerName = results.map(results => `${results.first_name} ${results.last_name}`);
+                        const managerList = results.map(results => `${results.first_name} ${results.last_name}`);
                         //adds the none option to allow the user to choose whether or not the employee reports to anyone.
-                        managerName.push('none');                        
+                        managerList.push('none');                        
 
                 inquirer
                 .prompt ([
@@ -84,11 +84,10 @@ function mainMenu () {
                         type: 'list',
                         message: 'Who is this employees Manager?',
                         name: 'manager',
-                        choices: managerName
+                        choices: managerList
                     }
                     
                 ]).then((data) => {
-                    console.log(data.empRole)
                     // Needed to split the chosen managers name so that they can be used to populate the query
                     // with their corresponding value
                     const name = data.manager.split(" ");
@@ -97,13 +96,13 @@ function mainMenu () {
                     // Selects the id of the department depending on the department name
                     db.query(queries.roleId, data.empRole, (err, results) => {
                         // The main Values that will be inserted, missing the manager id depending if null or not
-                        const insertValues = [data.firstName, data.lastName, results[0].id];
+                        const insertValues = [data.firstName.trim(), data.lastName.trim(), results[0].id];
                         // If the user chose a manager, pushes the id of the manager to inserValues
                         if (data.manager !== 'none') {
                         // Creates the new Employee with manager
                         db.query(queries.idRoleFullName, managerName, (err, results) => {
                             insertValues.push(results[0].id);
-                            db.query(queries.insertEmployee, insertValues);
+                            db.query(queries.insertEmployee, insertValues); 
                             mainMenu();
                         })
                         } else {
@@ -121,14 +120,15 @@ function mainMenu () {
             //UPDATE EMPLOYEE ROLE
             case 'Update Employee Role':
 
+            // Checks to see if there are any employees in the database.
             db.query(queries.fullName, (err, results) => { 
                 if (results.length === 0) {
                     console.log('Error, No Employees found to Update!');
                     return mainMenu();
                 } 
-
+                // create an array off all the employees in the db
                 const employeeList = results.map(results => `${results.first_name} ${results.last_name}`);
-
+                // Fetches all the roles in the database
                 db.query(queries.roleTitle, (err, results) => {
 
                     const roleList = results.map(results => `${results.title}`)
@@ -149,9 +149,10 @@ function mainMenu () {
                         }
                         ]).then((data) => {    
 
+                            // Grabs role id based on the role title.
                             db.query(queries.roleId, data.role, (err, results) => {
-                                console.log(results);
 
+                                // creates the array needed to update the role with the query
                                 const name = data.employee.split(" ");
                                 const employeeRoleAndName = [results[0].id, name[0], name[1]];
 
@@ -164,9 +165,65 @@ function mainMenu () {
 
                 break;
 
+            //UPDATE EMPLOYEE MANAGER
+            case 'Update Employee Manager':
+                db.query(queries.fullName, (err, results) => { 
+                    // Error Handling
+                    if (results.length === 0) {
+                        console.log('Error, No Employees found to Update!');
+                        return mainMenu();
+                    } 
+
+                    const employeeList = results.map(results => `${results.first_name} ${results.last_name}`);
+
+                    db.query(queries.fullName, (err, results) => {
+    
+                        const managerList = results.map(results => `${results.first_name} ${results.last_name}`);
+                        managerList.push('none');   
+                        inquirer
+                        .prompt([
+                            {
+                                type: 'list',
+                                message: `Which employee would you like to update?`,
+                                name: 'employee',
+                                choices: employeeList
+                            },
+                            {
+                                type: 'list',
+                                message: 'What manager would you like to assign?',
+                                name: 'manager',
+                                choices: managerList
+                            }
+                            ]).then((data) => {
+                                if (data.employee === data.manager) {
+                                    console.log('Employee cannot be their own manager!');
+                                    return mainMenu();
+                                }
+                                const name = data.manager.split(" ");
+                                const managerName = [name[0], name[1]];
+                                db.query(queries.idRoleFullName, managerName, (err, res) => {
+                                    const name = data.employee.split(" ");
+                                    const employeeName = [name[0], name[1]];
+                                    if (data.manager === 'none') {
+                                        employeeName.unshift(null);
+                                    } else if (data.manager !== 'none') {
+                                        employeeName.unshift(res[0].id)
+                                    }
+                                    db.query(queries.updateManager, employeeName, (err, res) => {
+                                        console.log('Updated manager successfully!')
+                                        mainMenu();
+                                    })
+
+                                })
+                            })
+                    })
+                })
+
+                break;
             //VIEW ALL ROLES
             case 'View All Roles':
                 db.query(viewAllRoles, (err, res) => {
+                    // Error for an empty role database
                     if (res.length === 0) {
                         console.log('Error, no roles to display!');
                         mainMenu();
@@ -179,6 +236,7 @@ function mainMenu () {
             //ADD ROLES
             case 'Add Role':
                 db.query(queries.departmentList, (err, results) => {
+                    // checks to see if role db is empty
                     if (results.length === 0) {
                         console.log('Unable to add Role, a department is required. Please add a Department.');
                         return mainMenu();
@@ -194,7 +252,15 @@ function mainMenu () {
                     {
                         type: 'input',
                         message: 'What is the roles salary',
-                        name: 'roleSalary'
+                        name: 'roleSalary',
+                        // Checks to see if the user had inputed a valid number with no characters.
+                        validate: function(value) {
+                            const num = parseInt(value);
+                            if (isNaN(num) || value !== num.toString()) {
+                              return 'Please enter a valid integer';
+                            }
+                            return true;
+                        }
                     },
                     {
                         type: 'list',
@@ -203,11 +269,11 @@ function mainMenu () {
                         choices: depList,
                     },
                 ]).then((data) => {
-                    
+                    // takes the string value inputed by the user and turns it into an INT
                     const salary = parseInt(data.roleSalary)
                     db.query(queries.idDepartmentWhereRole, data.roleDept, (err, results) => {
-
-                    const role = [data.roleName, salary , results[0].id];
+                    // Values to be inserted into role
+                    const role = [data.roleName.trim(), salary , results[0].id];
 
                     db.query(queries.insertRole, role, (err, res) => {
                         console.log('Role Added Succesfully!');

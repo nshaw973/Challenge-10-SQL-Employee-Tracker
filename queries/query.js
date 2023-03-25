@@ -1,5 +1,3 @@
-//All the queries needed for each function//
-
 // View All Queries
 const viewAllEmployees = `SELECT  
 e1.id,
@@ -46,7 +44,8 @@ const queries = {
     insertRole: 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?);',
     insertDepartment: 'INSERT INTO department (name) VALUES ( ? );',
     // Updates
-    updateRole: 'Update employee SET role_id = ? WHERE first_name = ? AND last_name = ?'
+    updateRole: 'UPDATE employee SET role_id = ? WHERE first_name = ? AND last_name = ?',
+    updateManager: 'UPDATE employee SET manager_id = ? WHERE first_name = ? AND last_name = ?'
 }
 
 module.exports = {
